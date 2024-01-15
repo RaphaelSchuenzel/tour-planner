@@ -1,6 +1,6 @@
 <script setup lang="ts">
+// get all drivers
 const supabase = useSupabaseClient()
-
 const { data: drivers } = await supabase
     .from('drivers')
     .select(`
@@ -9,6 +9,7 @@ const { data: drivers } = await supabase
         location
     `)
 
+// table - specify columns to display
 const tableColumns = [{
     key: 'name',
     label: 'Name'
@@ -20,15 +21,15 @@ const tableColumns = [{
     key: 'actions'
 }]
 
-const tableColumnActionItems = (row: any) => [
+const tableColumnActionItems = (driver: Driver) => [
     [{
         label: 'Edit',
         icon: 'i-heroicons-pencil-square-20-solid',
-        click: () => alert(`Edit: ${row.id}`)
+        click: () => alert(`Edit: ${driver.id}`)
     }], [{
         label: 'Delete',
         icon: 'i-heroicons-trash-20-solid',
-        click: () => alert(`Delete: ${row.id}`)
+        click: () => alert(`Delete: ${driver.id}`)
     }]
 ]
 </script>

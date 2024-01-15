@@ -1,6 +1,6 @@
 <script setup lang="ts">
+// get all tours
 const supabase = useSupabaseClient()
-
 const { data: tours } = await supabase
     .from('tours')
     .select(`
@@ -11,10 +11,18 @@ const { data: tours } = await supabase
         location_to,
         drivers (
             id,
-            name
+            name,
+            location
         )
     `)
-    
+
+// table - set sort order
+const tableSort = ref({
+    column: 'shipment_date',
+    direction: 'asc'
+})
+
+// table - specify columns to display
 const tableColumns = [{
     key: 'customer_name',
     label: 'Customer Name',
@@ -32,22 +40,22 @@ const tableColumns = [{
     label: 'Location to',
     sortable: true
 }, {
-    key: 'drivers.name',
+    key: 'drivers',
     label: 'Assigned Driver',
     sortable: true
 }, {
     key: 'actions'
 }]
 
-const tableColumnActionItems = (row: any) => [
+const tableColumnActionItems = (tour: Tour) => [
     [{
         label: 'Edit',
         icon: 'i-heroicons-pencil-square-20-solid',
-        click: () => alert(`Edit: ${row.id}`)
+        click: () => alert(`Edit: ${tour.id}`)
     }], [{
         label: 'Delete',
         icon: 'i-heroicons-trash-20-solid',
-        click: () => alert(`Delete: ${row.id}`)
+        click: () => alert(`Delete: ${tour.id}`)
     }]
 ]
 </script>
@@ -63,7 +71,11 @@ const tableColumnActionItems = (row: any) => [
     </div>
 
     <UContainer class="py-5">
-        <UTable :columns="tableColumns" :rows="tours">
+        <UTable :sort="tableSort" :columns="tableColumns" :rows="tours">
+            <template #drivers-data="{ row }">
+                <DriverSelect :tour="row" :driver="row.drivers" />
+            </template>
+
             <template #actions-data="{ row }">
                 <UDropdown :items="tableColumnActionItems(row)">
                     <UButton color="gray" variant="ghost" icon="i-heroicons-ellipsis-horizontal-20-solid" />
