@@ -1,20 +1,32 @@
 <script setup lang="ts">
 // get all tours
-const supabase = useSupabaseClient()
-const { data: tours } = await supabase
-    .from('tours')
-    .select(`
-        id,
-        customer_name,
-        shipment_date,
-        location_from,
-        location_to,
-        drivers (
+let tours = useState<Array<Tour>>('tours')
+
+await callOnce(async () => {
+    const { data, error } = await useSupabaseClient()
+        .from('tours')
+        .select(`
             id,
-            name,
-            location
-        )
-    `)
+            customer_name,
+            shipment_date,
+            location_from,
+            location_to,
+            drivers (
+                id,
+                name,
+                location
+            )
+        `)
+
+    if (error) {
+        useToast().add({
+            title: `An error occured: ${error.message}`,
+            color: 'red'
+        })
+    } else {
+        tours.value = data;
+    }
+})
 
 // table - set sort order
 const tableSort = ref({
