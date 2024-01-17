@@ -30,7 +30,7 @@ const tableColumns = [{
     label: 'Location',
     sortable: true
 }, {
-    key: 'actions'
+    key: 'edit'
 }]
 </script>
 
@@ -50,7 +50,7 @@ const tableColumns = [{
 
     <UContainer class="py-5">
         <UTable :columns="tableColumns" :rows="drivers">
-            <template #actions-data="{ row }">
+            <template #edit-data="{ row }">
                 <NuxtLink :to="`/drivers/${row.id}`">
                     <UButton
                         color="gray"

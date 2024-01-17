@@ -67,8 +67,13 @@ async function submitDriverData(event: FormSubmitEvent<Driver>) {
             name: event.data.name,
             location: event.data.location
         })
+        .select(`
+            id,
+            name,
+            location
+        `)
         .single()
-    
+
     if (error) {
         useToast().add({
             title: `An error occured: ${error.message}`,
@@ -120,14 +125,14 @@ if (props.driverId) getDriverData()
         <UFormGroup label="Location" name="location">
             <UInput
                 v-model="state.location"
-                type="location"
                 :loading="isLoadingDriverData"
                 :disabled="isLoadingDriverData"
             />
         </UFormGroup>
 
         <UButton type="submit" block>
-            Submit
+            <span v-if="driverId">Save</span>
+            <span v-else>Create</span>
         </UButton>
     </UForm>
 

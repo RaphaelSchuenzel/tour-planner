@@ -52,46 +52,38 @@ const tableColumns = [{
     label: 'Location to',
     sortable: true
 }, {
-    key: 'drivers',
+    key: 'drivers.name',
     label: 'Assigned Driver',
     sortable: true
 }, {
-    key: 'actions'
+    key: 'edit'
 }]
-
-const tableColumnActionItems = (tour: Tour) => [
-    [{
-        label: 'Edit',
-        icon: 'i-heroicons-pencil-square-20-solid',
-        click: () => alert(`Edit: ${tour.id}`)
-    }], [{
-        label: 'Delete',
-        icon: 'i-heroicons-trash-20-solid',
-        click: () => alert(`Delete: ${tour.id}`)
-    }]
-]
 </script>
 
 <template>
+    <NuxtPage />
+    
     <div class="flex justify-between items-center h-16 px-5 border-b border-gray-200 dark:border-gray-700">
         <h1>Tours</h1>
 
-        <UButton
-            icon="i-heroicons-plus-20-solid"
-            label="New Tour"
-        />
+        <NuxtLink to="/tours/new">
+            <UButton
+                icon="i-heroicons-plus-20-solid"
+                label="New Tour"
+            />
+        </NuxtLink>
     </div>
 
     <UContainer class="py-5">
         <UTable :sort="tableSort" :columns="tableColumns" :rows="tours">
-            <template #drivers-data="{ row }">
-                <DriverSelect :tour="row" :driver="row.drivers" />
-            </template>
-
-            <template #actions-data="{ row }">
-                <UDropdown :items="tableColumnActionItems(row)">
-                    <UButton color="gray" variant="ghost" icon="i-heroicons-ellipsis-horizontal-20-solid" />
-                </UDropdown>
+            <template #edit-data="{ row }">
+                <NuxtLink :to="`/tours/${row.id}`">
+                    <UButton
+                        color="gray"
+                        variant="ghost"
+                        icon="i-heroicons-pencil-square-20-solid"
+                    />
+                </NuxtLink>
             </template>
         </UTable>
     </UContainer>
