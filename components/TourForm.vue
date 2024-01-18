@@ -11,9 +11,10 @@ const state = reactive({
     shipment_date: '',
     location_from: '',
     location_to: '',
-    assigned_driver_id: '',
-    availableDrivers: []
+    assigned_driver_id: ''
 })
+
+let availableDrivers = ref([])
 
 // form - validation
 const validate = (state: any): FormError[] => {
@@ -34,6 +35,7 @@ const tours = useState<Array<Tour>>('tours')
 
 // loading / submitting state
 let isLoadingTourData = ref(false)
+let isLoadingAvailableDrivers = ref(false)
 let isSubmittingTourData = ref(false)
 
 async function getTourData() {
@@ -62,32 +64,63 @@ async function getTourData() {
             color: 'red'
         })
     } else if (tour) {
-        // get all drivers located @ the tour's starting locationn
-        const { data: availableDrivers, error } = await supabase
-            .from('drivers')
-            .select(`
-                id,
-                name,
-                location
-            `)
-            .eq('location', tour.location_from)
-
-        if (error) {
-            useToast().add({
-                title: `An error occured: ${error.message}`,
-                color: 'red'
-            })
-        } else if (availableDrivers) {
-            state.customer_name = tour.customer_name
-            state.shipment_date = tour.shipment_date
-            state.location_from = tour.location_from
-            state.location_to = tour.location_to
-            state.assigned_driver_id = tour.drivers.id
-            state.availableDrivers = availableDrivers
-        }
+        state.customer_name = tour.customer_name
+        state.shipment_date = tour.shipment_date
+        state.location_from = tour.location_from
+        state.location_to = tour.location_to
+        state.assigned_driver_id = tour.drivers.id
     }
 
     isLoadingTourData.value = false
+}
+
+// get available drivers for tour
+async function getAvailableDrivers() {
+    isLoadingAvailableDrivers.value = true
+
+    // get all drivers located @ the tour's starting locationn
+    const { data: availableDriverData, error } = await supabase
+        .from('drivers')
+        .select(`
+            id,
+            name,
+            location
+        `)
+        .eq('location', state.location_from)
+
+    if (error) {
+        useToast().add({
+            title: `An error occured: ${error.message}`,
+            color: 'red'
+        })
+    } else if (availableDriverData) {
+        const exists = availableDriverData.findIndex(availableDriver => availableDriver.id === state.assigned_driver_id) > -1
+
+        if (!exists) {
+            const { data: assignedDriverData, error } = await supabase
+                .from('drivers')
+                .select(`
+                    id,
+                    name,
+                    location
+                `)
+                .eq('id', state.assigned_driver_id)
+                .single()
+
+            if (error) {
+                useToast().add({
+                    title: `An error occured: ${error.message}`,
+                    color: 'red'
+                })
+            } else if (assignedDriverData) {
+                availableDriverData.push(assignedDriverData)
+            }
+        }
+
+        availableDrivers.value = availableDriverData
+    }
+
+    isLoadingAvailableDrivers.value = false
 }
 
 async function submitTourData(event: FormSubmitEvent<Tour>) {
@@ -95,16 +128,18 @@ async function submitTourData(event: FormSubmitEvent<Tour>) {
 
     isSubmittingTourData.value = true
 
+    const upsertData: Tour = {
+        id: props.tourId ? props.tourId : null,
+        customer_name: event.data.customer_name,
+        shipment_date: event.data.shipment_date,
+        location_from: event.data.location_from,
+        location_to: event.data.location_to,
+        assigned_driver_id: event.data.assigned_driver_id
+    }
+
     const { data, error } = await supabase
         .from('tours')
-        .upsert({
-            id: props.tourId,
-            customer_name: event.data.customer_name,
-            shipment_date: event.data.shipment_date,
-            location_from: event.data.location_from,
-            location_to: event.data.location_to,
-            assigned_driver_id: event.data.assigned_driver_id
-        })
+        .upsert(upsertData)
         .select(`
             id,
             customer_name,
@@ -155,6 +190,11 @@ async function deleteTour() {
 
 // get tour data if tour id is provided
 if (props.tourId) getTourData()
+
+// re-fetch available drivers on 'location from' input change
+watch(() => state.location_from, async (newLocation, oldLocation) => {
+    if (newLocation != oldLocation) getAvailableDrivers()
+})
 </script>
 
 <template>
@@ -193,10 +233,13 @@ if (props.tourId) getTourData()
         
         <UFormGroup label="Assigned Driver" name="assigned_driver">
             <USelect
+                placeholder="Select a driver..."
                 v-model="state.assigned_driver_id"
-                :options="state.availableDrivers"
+                :options="availableDrivers"
                 optionAttribute="name"
                 valueAttribute="id"
+                :loading="isLoadingAvailableDrivers"
+                :disabled="isLoadingAvailableDrivers || !availableDrivers"
             />
         </UFormGroup>
 

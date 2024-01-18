@@ -60,13 +60,15 @@ async function submitDriverData(event: FormSubmitEvent<Driver>) {
 
     isSubmittingDriverData.value = true
 
+    const upsertData: Driver = {
+        id: props.driverId ? props.driverId : null,
+        name: event.data.name,
+        location: event.data.location
+    }
+
     const { data, error } = await supabase
         .from('drivers')
-        .upsert({
-            id: props.driverId,
-            name: event.data.name,
-            location: event.data.location
-        })
+        .upsert(upsertData)
         .select(`
             id,
             name,
