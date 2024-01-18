@@ -21,8 +21,13 @@ const validate = (state: any): FormError[] => {
     const errors = []
     if (!state.customer_name) errors.push({ path: 'customer_name', message: 'Required' })
     if (!state.shipment_date) errors.push({ path: 'shipment_date', message: 'Required' })
+
     if (!state.location_from) errors.push({ path: 'location_from', message: 'Required' })
+    if (state.location_from && /\d/.test(state.location_from)) errors.push({ path: 'location_from', message: 'No numbers allowed' })
+
     if (!state.location_to) errors.push({ path: 'location_to', message: 'Required' })
+    if (state.location_to && /\d/.test(state.location_to)) errors.push({ path: 'location_to', message: 'No numbers allowed' })
+
     if (!state.assigned_driver_id) errors.push({ path: 'assigned_driver_id', message: 'Required' })
     return errors
 }

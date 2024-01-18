@@ -16,6 +16,7 @@ const validate = (state: any): FormError[] => {
     const errors = []
     if (!state.name) errors.push({ path: 'name', message: 'Required' })
     if (!state.location) errors.push({ path: 'location', message: 'Required' })
+    if (state.location && /\d/.test(state.location)) errors.push({ path: 'location', message: 'No numbers allowed' })
     return errors
 }
 
