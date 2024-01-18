@@ -6,6 +6,7 @@ await callOnce(async () => {
     const { data, error } = await useSupabaseClient()
         .from('drivers')
         .select(driverSelect)
+        .order('id', { ascending: true })
 
     if (error) return errorToast(error.message)
     
@@ -39,17 +40,19 @@ const tableColumns = [{
         </NuxtLink>
     </div>
 
-    <UContainer class="py-5">
-        <UTable :columns="tableColumns" :rows="drivers">
-            <template #edit-data="{ row }">
-                <NuxtLink :to="`/drivers/${row.id}`">
-                    <UButton
-                        color="gray"
-                        variant="ghost"
-                        icon="i-heroicons-pencil-square-20-solid"
-                    />
-                </NuxtLink>
-            </template>
-        </UTable>
-    </UContainer>
+    <div class="scroll-container">
+        <UContainer class="scroll-container py-5">
+            <UTable :columns="tableColumns" :rows="drivers">
+                <template #edit-data="{ row }">
+                    <NuxtLink :to="`/drivers/${row.id}`">
+                        <UButton
+                            color="gray"
+                            variant="ghost"
+                            icon="i-heroicons-pencil-square-20-solid"
+                        />
+                    </NuxtLink>
+                </template>
+            </UTable>
+        </UContainer>
+    </div>
 </template>

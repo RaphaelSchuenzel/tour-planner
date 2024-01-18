@@ -47,9 +47,9 @@ async function getTourData() {
         .eq('id', props.tourId)
         .single()
 
-    if (error) return errorToast(error.message)
-
-    if (tour) {
+    if (error) {
+        return errorToast(error.message)
+    } else if (tour) {
         state.customer_name = tour.customer_name
         state.shipment_date = tour.shipment_date
         state.location_from = tour.location_from
@@ -70,22 +70,24 @@ async function getAvailableDrivers() {
         .select(driverSelect)
         .eq('location', state.location_from)
 
-    if (error) return errorToast(error.message)
-    
-    if (availableDriverData) {
-        const exists = availableDriverData.findIndex(availableDriver => availableDriver.id === state.assigned_driver_id) > -1
+    if (error) {
+        return errorToast(error.message)
+    } else if (availableDriverData) {
+        if (state.assigned_driver_id) {
+            const availableDriverDataContainsAssignedDriver = availableDriverData.findIndex(availableDriver => availableDriver.id === state.assigned_driver_id) > -1
 
-        if (!exists) {
-            const { data: assignedDriverData, error } = await supabase
-                .from('drivers')
-                .select(driverSelect)
-                .eq('id', state.assigned_driver_id)
-                .single()
+            if (!availableDriverDataContainsAssignedDriver) {
+                const { data: assignedDriverData, error } = await supabase
+                    .from('drivers')
+                    .select(driverSelect)
+                    .eq('id', state.assigned_driver_id)
+                    .single()
 
-            if (error) return errorToast(error.message)
-
-            if (assignedDriverData) {
-                availableDriverData.push(assignedDriverData)
+                if (error) {
+                    errorToast(error.message)
+                } else if (assignedDriverData) {
+                    availableDriverData.push(assignedDriverData)
+                }
             }
         }
 
@@ -101,7 +103,7 @@ async function submitTourData(event: FormSubmitEvent<Tour>) {
     isSubmittingTourData.value = true
 
     const upsertData: Tour = {
-        id: props.tourId ? props.tourId : null,
+        id: props.tourId ? props.tourId : undefined,
         customer_name: event.data.customer_name,
         shipment_date: event.data.shipment_date,
         location_from: event.data.location_from,
@@ -111,13 +113,13 @@ async function submitTourData(event: FormSubmitEvent<Tour>) {
 
     const { data, error } = await supabase
         .from('tours')
-        .upsert(upsertData)
+        .upsert(upsertData, { onConflict: 'id' })
         .select(tourSelect)
         .single()
     
-    if (error) return errorToast(error.message)
-
-    if (data) {        
+    if (error) {
+        errorToast(error.message)
+    } else if (data) {        
         if (props.tourId) {
             tours.value = tours.value.map(tour => tour.id !== data.id ? tour : data)
         } else {

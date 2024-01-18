@@ -38,9 +38,9 @@ async function getDriverData() {
         .eq('id', props.driverId)
         .single()
 
-    if (error) return errorToast(error.message)
-
-    if (data) {
+    if (error) {
+        errorToast(error.message)
+    } else if (data) {
         state.name = data.name
         state.location = data.location
     }
@@ -54,20 +54,20 @@ async function submitDriverData(event: FormSubmitEvent<Driver>) {
     isSubmittingDriverData.value = true
 
     const upsertData: Driver = {
-        id: props.driverId ? props.driverId : null,
+        id: props.driverId ? props.driverId : undefined,
         name: event.data.name,
         location: event.data.location
     }
 
     const { data, error } = await supabase
         .from('drivers')
-        .upsert(upsertData)
+        .upsert(upsertData, { onConflict: 'id' })
         .select(driverSelect)
         .single()
 
-    if (error) return errorToast(error.message)
-    
-    if (data) {
+    if (error) {
+        return errorToast(error.message)
+    } else if (data) {
         if (props.driverId) {
             drivers.value = drivers.value.map(driver => driver.id !== data.id ? driver : data)
         } else {

@@ -9,3 +9,14 @@
 
     <UNotifications />
 </template>
+
+<style>
+html, body {
+    overflow: hidden;
+}
+
+.scroll-container {
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+}
+</style>

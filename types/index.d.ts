@@ -2,7 +2,7 @@ export { Tour, Driver }
 
 declare global {
     interface Tour {
-        id: number | null
+        id: number | undefined
         customer_name: string
         shipment_date: date
         location_from: string
@@ -11,7 +11,7 @@ declare global {
     }
 
     interface Driver {
-        id: number | null
+        id: number | undefined
         name: string
         location: string
     }

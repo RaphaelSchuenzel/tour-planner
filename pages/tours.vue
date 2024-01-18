@@ -6,6 +6,7 @@ await callOnce(async () => {
     const { data, error } = await useSupabaseClient()
         .from('tours')
         .select(tourSelect)
+        .order('id', { ascending: true })
 
     if (error) return errorToast(error.message)
     
@@ -58,25 +59,27 @@ const tableColumns = [{
         </NuxtLink>
     </div>
 
-    <UContainer class="py-5">
-        <UTable :sort="tableSort" :columns="tableColumns" :rows="tours">
-            <template #drivers-data="{ row }">
-                <ULink
-                    :to="`/drivers/${row.drivers.id}`"
-                    active-class="text-primary"
-                    inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                >{{ row.drivers.name }}</ULink>
-            </template>
+    <div class="scroll-container">
+        <UContainer class="py-5">
+            <UTable :sort="tableSort" :columns="tableColumns" :rows="tours">
+                <template #drivers-data="{ row }">
+                    <ULink
+                        :to="`/drivers/${row.drivers.id}`"
+                        active-class="text-primary"
+                        inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    >{{ row.drivers.name }}</ULink>
+                </template>
 
-            <template #edit-data="{ row }">
-                <NuxtLink :to="`/tours/${row.id}`">
-                    <UButton
-                        color="gray"
-                        variant="ghost"
-                        icon="i-heroicons-pencil-square-20-solid"
-                    />
-                </NuxtLink>
-            </template>
-        </UTable>
-    </UContainer>
+                <template #edit-data="{ row }">
+                    <NuxtLink :to="`/tours/${row.id}`">
+                        <UButton
+                            color="gray"
+                            variant="ghost"
+                            icon="i-heroicons-pencil-square-20-solid"
+                        />
+                    </NuxtLink>
+                </template>
+            </UTable>
+        </UContainer>
+    </div>
 </template>
