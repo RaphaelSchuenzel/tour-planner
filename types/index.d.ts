@@ -1,4 +1,4 @@
-export { Tour, Driver };
+export { Tour, Driver }
 
 declare global {
     interface Tour {

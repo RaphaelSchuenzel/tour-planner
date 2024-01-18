@@ -34,20 +34,13 @@ async function getDriverData() {
 
     const { data, error } = await supabase
         .from('drivers')
-        .select(`
-            id,
-            name,
-            location
-        `)
+        .select(driverSelect)
         .eq('id', props.driverId)
         .single()
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else {
+    if (error) return errorToast(error.message)
+
+    if (data) {
         state.name = data.name
         state.location = data.location
     }
@@ -69,19 +62,12 @@ async function submitDriverData(event: FormSubmitEvent<Driver>) {
     const { data, error } = await supabase
         .from('drivers')
         .upsert(upsertData)
-        .select(`
-            id,
-            name,
-            location
-        `)
+        .select(driverSelect)
         .single()
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else if (data) {
+    if (error) return errorToast(error.message)
+    
+    if (data) {
         if (props.driverId) {
             drivers.value = drivers.value.map(driver => driver.id !== data.id ? driver : data)
         } else {
@@ -100,14 +86,9 @@ async function deleteDriverAccount() {
         .delete()
         .eq('id', props.driverId)
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else {
-        drivers.value = drivers.value.filter(driver => { return driver.id != props.driverId })
-    }
+    if (error) return errorToast(error.message)
+    
+    drivers.value = drivers.value.filter(driver => { return driver.id != props.driverId })
 }
 
 // get driver data if driver id is provided

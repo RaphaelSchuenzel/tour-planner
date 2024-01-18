@@ -43,27 +43,13 @@ async function getTourData() {
 
     const { data: tour, error } = await supabase
         .from('tours')
-        .select(`
-            id,
-            customer_name,
-            shipment_date,
-            location_from,
-            location_to,
-            drivers (
-                id,
-                name,
-                location
-            )
-        `)
+        .select(tourSelect)
         .eq('id', props.tourId)
         .single()
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else if (tour) {
+    if (error) return errorToast(error.message)
+
+    if (tour) {
         state.customer_name = tour.customer_name
         state.shipment_date = tour.shipment_date
         state.location_from = tour.location_from
@@ -81,38 +67,24 @@ async function getAvailableDrivers() {
     // get all drivers located @ the tour's starting locationn
     const { data: availableDriverData, error } = await supabase
         .from('drivers')
-        .select(`
-            id,
-            name,
-            location
-        `)
+        .select(driverSelect)
         .eq('location', state.location_from)
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else if (availableDriverData) {
+    if (error) return errorToast(error.message)
+    
+    if (availableDriverData) {
         const exists = availableDriverData.findIndex(availableDriver => availableDriver.id === state.assigned_driver_id) > -1
 
         if (!exists) {
             const { data: assignedDriverData, error } = await supabase
                 .from('drivers')
-                .select(`
-                    id,
-                    name,
-                    location
-                `)
+                .select(driverSelect)
                 .eq('id', state.assigned_driver_id)
                 .single()
 
-            if (error) {
-                useToast().add({
-                    title: `An error occured: ${error.message}`,
-                    color: 'red'
-                })
-            } else if (assignedDriverData) {
+            if (error) return errorToast(error.message)
+
+            if (assignedDriverData) {
                 availableDriverData.push(assignedDriverData)
             }
         }
@@ -140,26 +112,12 @@ async function submitTourData(event: FormSubmitEvent<Tour>) {
     const { data, error } = await supabase
         .from('tours')
         .upsert(upsertData)
-        .select(`
-            id,
-            customer_name,
-            shipment_date,
-            location_from,
-            location_to,
-            drivers (
-                id,
-                name,
-                location
-            )
-        `)
+        .select(tourSelect)
         .single()
     
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else if (data) {        
+    if (error) return errorToast(error.message)
+
+    if (data) {        
         if (props.tourId) {
             tours.value = tours.value.map(tour => tour.id !== data.id ? tour : data)
         } else {
@@ -178,14 +136,9 @@ async function deleteTour() {
         .delete()
         .eq('id', props.tourId)
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else {
-        tours.value = tours.value.filter(tour => { return tour.id != props.tourId })
-    }
+    if (error) return errorToast(error.message)
+
+    tours.value = tours.value.filter(tour => { return tour.id != props.tourId })
 }
 
 // get tour data if tour id is provided

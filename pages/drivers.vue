@@ -5,20 +5,11 @@ let drivers = useState<Array<Driver>>('drivers')
 await callOnce(async () => {
     const { data, error } = await useSupabaseClient()
         .from('drivers')
-        .select(`
-            id,
-            name,
-            location
-        `)
+        .select(driverSelect)
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else {
-        drivers.value = data;
-    }
+    if (error) return errorToast(error.message)
+    
+    if (data) drivers.value = data
 })
 
 // table - specify columns to display

@@ -5,27 +5,11 @@ let tours = useState<Array<Tour>>('tours')
 await callOnce(async () => {
     const { data, error } = await useSupabaseClient()
         .from('tours')
-        .select(`
-            id,
-            customer_name,
-            shipment_date,
-            location_from,
-            location_to,
-            drivers (
-                id,
-                name,
-                location
-            )
-        `)
+        .select(tourSelect)
 
-    if (error) {
-        useToast().add({
-            title: `An error occured: ${error.message}`,
-            color: 'red'
-        })
-    } else {
-        tours.value = data;
-    }
+    if (error) return errorToast(error.message)
+    
+    if (data) tours.value = data
 })
 
 // table - set sort order
