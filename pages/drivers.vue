@@ -29,19 +29,18 @@ const tableColumns = [{
 <template>
     <NuxtPage />
 
-    <div class="flex justify-between items-center h-16 px-5 border-b border-gray-200 dark:border-gray-700">
-        <h1>Drivers</h1>
-        
-        <NuxtLink to="/drivers/new">
+    <div class="flex justify-end items-center px-5 h-16 xl:border-b xl:border-gray-200 xl:dark:border-gray-700">
+        <NuxtLink to="/drivers/new" class="flex w-full xl:w-max">
             <UButton
+                class="flex-1 justify-center xl:w-unset xl:justify-start"
                 icon="i-heroicons-plus-20-solid"
                 label="New Driver"
             />
         </NuxtLink>
     </div>
 
-    <div class="scroll-container">
-        <UContainer class="scroll-container py-5">
+    <div class="h-[calc(100vh-8rem)] xl:h-[calc(100vh-4rem)] overflow-y-auto">
+        <UContainer class="xl:py-5">
             <UTable :columns="tableColumns" :rows="drivers">
                 <template #edit-data="{ row }">
                     <NuxtLink :to="`/drivers/${row.id}`">

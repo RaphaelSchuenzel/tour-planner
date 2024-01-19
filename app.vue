@@ -1,5 +1,5 @@
 <template>
-    <div class="flex h-screen">
+    <div class="xl:flex h-screen">
         <Sidebar />
         
         <main class="flex-1">
@@ -13,10 +13,5 @@
 <style>
 html, body {
     overflow: hidden;
-}
-
-.scroll-container {
-    height: calc(100vh - 4rem);
-    overflow-y: auto;
 }
 </style>

@@ -47,20 +47,19 @@ const tableColumns = [{
 
 <template>
     <NuxtPage />
-    
-    <div class="flex justify-between items-center h-16 px-5 border-b border-gray-200 dark:border-gray-700">
-        <h1>Tours</h1>
 
-        <NuxtLink to="/tours/new">
+    <div class="flex justify-end items-center px-5 h-16 xl:border-b xl:border-gray-200 xl:dark:border-gray-700">
+        <NuxtLink to="/tours/new" class="flex w-full xl:w-max">
             <UButton
+                class="flex-1 justify-center xl:w-unset xl:justify-start"
                 icon="i-heroicons-plus-20-solid"
                 label="New Tour"
             />
         </NuxtLink>
     </div>
 
-    <div class="scroll-container">
-        <UContainer class="py-5">
+    <div class="h-[calc(100vh-8rem)] xl:h-[calc(100vh-4rem)] overflow-y-auto">
+        <UContainer class="xl:py-5">
             <UTable :sort="tableSort" :columns="tableColumns" :rows="tours">
                 <template #drivers-data="{ row }">
                     <ULink
